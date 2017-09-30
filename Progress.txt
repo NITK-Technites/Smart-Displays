@@ -1,0 +1,100 @@
+Date:18th Sep 2017
+
+Interfacing 74HC595 and TLC59213 for high side driving
+
+MSBFIRST:	Arduino sends MSB of byte into SER line
+If byte is 0x55 then 
+0b  01010101
+0(MSB) will get shift to Qa first.
+Next clock pulse 1 will get shifted to Qa and Qb will have Qa(Previous)
+and so on
+Q-	7 6 5 4 3 2 1 0
+	0 1 0 1 0 1 0 1
+
+
+To make 8x64 Led Matrix we need to send 64 bits of row data at a time and 
+scan byte ==> Total = 9 bytes
+
+8 bytes - 64 bits
+															----x----
+
+		    7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0
+		0
+	|	1
+	|	2
+	Y	3
+	|	4
+	|	5
+		6
+		7 (0,0)
+
+
+
+
+7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0
+
+4 - 0  15
+
+0101
+
+Date: 19th sep 2017
+
+Bought 600LEDs and required components from managalore pearl electronics to make a 8x64 LED Matrix
+
+Bought a hard board from surathkal jyothi and drilled 512 holes of 5mm with 5mm spacing in to that board
+
+Cathodes are shorted row wise and anodes are shorted columnwise
+
+soldering 4 rows horizontally is done
+
+Date: 20th september to 22nd september
+
+Other team mates were still working on shorting anodes in columns and shorting cathodes in rows
+
+I started working on making the control board with 9 shift registers.
+
+74HC595 SIPO shift registers are used to send data from arduino to matrix
+
+Low side Driving - 74HC595 connected to ULN2803(current sink driver)
+
+Since there are only 8 rows in 8x64 matrix only one 74hc595 with ULN2803 is used
+
+High Side Driving - 74HC595 connected to TLC59213
+
+TLC59213 is a PIPO shift register with darlington pairs at each channel.
+
+Since there are 64 columns 8 74HC595 with TLC59213 are used
+
+
+74HC595
+
+SRCLK pin of all 74HC595 were shorted together
+Latch pin of all 74HC595 were shorted together
+Blank pin of all 74HC595 were shorted together
+
+Data in of row side shift register is given from arduino and data out of this shift register goes to data out of next shift register in series and so on
+
+Outputs of all shit registers were given to inputs of their respective drivers.
+
+Clock pin of TLC59213s are shorted together
+
+Supply for TLC59213 is different from supply to 74HC595 shift registers
+
+Date: 23rd september
+
+Forgot to solder 47 ohm resistors in series with columns which are must for current limiting. So we soldered them
+
+Tested the control board by sending data using arduino and verified it.
+
+Cleared some solder bridges in between
+
+Started writing code for LED matrix
+
+I came up with a new idea which makes the programming part easier and implemented that idea.
+
+Written code to make led on or off given the position of led interms of x and y and tested it.
+
+Written code to display 8 8x8 characters on the display. msg is given in string format in arduino and tested it.
+
+Written code to scroll a message to left on the display. Need to test this code. 
+
