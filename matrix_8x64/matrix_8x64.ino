@@ -2,6 +2,11 @@
   Smart Displays : 8x64 LED Matrix
   Normal code:
         Multiplexing( No timer Interrypts )
+
+  code by:
+  K S S M KAMAL
+  NIT SURATHKAL
+  Dept of ECE
 */
 
 #include <SPI.h>

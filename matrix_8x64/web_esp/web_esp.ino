@@ -1,3 +1,15 @@
+/*
+  Smart Displays : 8x64 LED Matrix
+  ESP8266 Code:
+       Sends data received from client to Arduino which is controlling Matrix using
+       hardware serial
+       
+  Code by:
+  K S S M KAMAL
+  NIT SURATHKAL
+  Dept of ECE
+*/
+
 #include<ESP8266WiFi.h>
 #include<ESP8266WebServer.h>
 #include<ESP8266mDNS.h>
@@ -22,7 +34,7 @@ void setup()
   }
   Serial.println("IP address of ESP8266 is: ");
   Serial.print(WiFi.localIP());
-  if(MDNS.begin("smartdisplays"))
+  if (MDNS.begin("smartdisplays"))
   {
     Serial.println("MDNS Responder Started");
   }
