@@ -4,7 +4,7 @@
         Multiplexing( No timer Interrypts )
 
   code by:
-  K S S M KAMALK
+  K S S M KAMAL
   NIT SURATHKAL
   Dept of ECE
 */
