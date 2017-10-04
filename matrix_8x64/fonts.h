@@ -1,5 +1,5 @@
 
-const byte char_def[] = {
+const byte char_def[]PROGMEM = {
   0,0,0,0,0,0,0,0,                // Space symbol (must be the first character in this array)
   // Upper case letters:
   24,60,102,126,102,102,102,0,    // A
@@ -94,7 +94,9 @@ const byte char_def[] = {
   0,0,126,0,126,0,0,0,            // =
   0,0,0,0,0,0,0,255               // _
 };
-const byte char_def_7x5[] = {
+
+
+const byte char_def_7x5[]PROGMEM= {
     B00000000,  //Space (Char 0x20)
     B00000000,
     B00000000,
