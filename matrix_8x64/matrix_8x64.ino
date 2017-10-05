@@ -21,7 +21,7 @@
 
 
 
-unsigned long pause_time = 3000000;
+unsigned long pause_time = 2000000;
 unsigned long scroll_speed = 60000;
 
 unsigned long present_ms = 0;
@@ -31,15 +31,21 @@ unsigned long pause_ms = 0;
 uint8_t fade_column = 0, scroll_index = 0;
 boolean flag = 0, pause;
 boolean scroll_direction = 0;  //0 - scroll left and 1 - scroll right
+boolean start_slice = 0;
+
+unsigned int shift_count = 0;
+unsigned int slice_column = 0;
 
 uint64_t bitmask = 1, temp, led[8] = {0}; //led array with each element consisting 64 bits which corresponds to row data in multiplexing
 
 uint64_t scroll_msg[2][8];   //led array with real and virtual matrix data
 unsigned int msg_index = 0;
-boolean font_sel = 1; // 0 for 8x8 font, 1 for 7x5 font
+int font_sel = 1; // 0 for 8x8 font, 1 for 7x5 font
+int slice = 0; // make this 1 for slicing Animation
+int fade = 0;
 const byte char_set[] = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&'()*+-,.~:;<>?@[]/\\=_";
 
-String msg = "VENKY LOVES HARRY ";
+String msg = "TECHNITES2K17";
 
 void setup() {
   // put your setup code here, to run once:
@@ -63,7 +69,8 @@ void setup() {
   //interrupts();
   msg_check();
   //frame_decode_7x5();
-  initialize();
+  if (fade == 0)
+    initialize();
 }
 
 void loop()
@@ -72,32 +79,126 @@ void loop()
   if (present_ms - last_ms > scroll_speed)
   {
     last_ms = present_ms;
-    if (pause == true) {
+    if (fade == 1)
+    {
+      fade_on();
+      fade_column++;
+      if (fade_column == 64)
+      {
+        fade_column = 0;
+        for (int i = 0; i < 8; i++)
+        {
+          scroll_msg[0][i] = 0;
+        }
+      }
+    }
+    else if (pause == true) {
       finish_scroll();
       if (present_ms - pause_ms > pause_time)
       {
         if (Serial.available() > 0)
         {
           msg = Serial.readStringUntil('\n');
+          parse_msg();
           msg_check();
         }
         initialize();
       }
     }
     else
-      scroll_message();
+    {
+      if (slice == 0)
+      {
+        scroll_message();
+      }
+      else
+      {
+        scroll_speed = 2000;
+        slice_message();
+      }
+    }
   }
   // scroll_multiplex();
+    if (fade == 1)
+  {
+    if (flag == 0)
+    {
+      if (font_sel == 0)
+        scroll_frame_decode();
+      else
+        frame_decode_7x5();
+      flag = 1;
+    }
+  }
   multiplex(scroll_msg[0]);
-
 }
 
+void parse_msg()
+{
+   int l = msg.length(), k = 1;
+  int limits[200];
+  limits[0] = 0;
+  for (int i = 0; i < l; i++)
+  {
+    if (msg[i] == '#')
+    {
+      limits[k] = i + 1;
+      k++;
+    }
+  }
+  Serial.println(msg);
+  String temp = msg.substring(limits[1], limits[2] - 1);
+  slice = temp.toInt(); 
+  temp = msg.substring(limits[2], limits[3] - 1);
+  font_sel = temp.toInt();
+  msg = msg.substring(limits[0], limits[1] - 1);
+}
+void fade_on()
+{
+  for (int i = 0; i < 8; i++)
+  {
+    uint64_t bitmask = 1;
+    scroll_msg[0][i] |= (scroll_msg[1][i] & (bitmask << (63 - fade_column)));
+
+  }
+}
+void slice_message()
+{
+  if (!start_slice)
+  {
+    for (int i = 0; i < 8; i++)
+    {
+      boolean col_bit = scroll_msg[1][i] >> 63;
+      if (col_bit)
+        scroll_msg[0][i] |= 0xFFFFFFFFFFFFFFFF >> (63 - 8 + (slice_column / 8));
+      scroll_msg[1][i] = scroll_msg[1][i] << 1;
+    }
+    start_slice = true;
+    slice_column += 1;
+  }
+  else
+  {
+    for (int i = 0; i < 8; i++)
+      scroll_msg[0][i] = scroll_msg[0][i] & (~(0xFFFFFFFFFFFFFFFF >> (slice_column))) | ((scroll_msg[0][i] << 1) & (0xFFFFFFFFFFFFFFFF >> (slice_column - 1)));
+    shift_count += 1;
+    if (shift_count == 63)///slice_column)
+    {
+      start_slice = false;
+      shift_count = 0;
+    }
+  }
+  if (slice_column == 64)
+  {
+    slice_column = 0;
+    scroll_frame_decode();
+  }
+}
 void multiplex(uint64_t arr[])
 {
   uint8_t row_sel = 128;
   for (int i = 0; i < 8; i++)
   {
-    // SPI_data_transfer(0);
+    //SPI_data_transfer(0);
     //SPI.transfer(0);
     //latch();
     SPI_data_transfer(arr[i]);
@@ -109,6 +210,7 @@ void multiplex(uint64_t arr[])
 
 void msg_check()
 {
+
   if (msg.length() % 8 != 0)
     msg += "             ";
 }
@@ -129,6 +231,14 @@ void scroll_multiplex()
 
 void initialize()
 {
+  if (slice == 1)
+  {
+    scroll_speed = 2000;
+  }
+  else
+  {
+    scroll_speed = 60000;
+  }
   for (int i = 0; i < 2; i++)
   {
     for (int j = 0; j < 8; j++)
@@ -149,6 +259,7 @@ void initialize()
 
 void finish_scroll()
 {
+  scroll_speed = 60000;
   for (int i = 0; i < 8; i++)
   {
     scroll_msg[0][i] = scroll_msg[0][i] << 1;

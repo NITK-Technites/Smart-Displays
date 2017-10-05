@@ -14,11 +14,21 @@
 </style>
 
 <body>
-	<h1 class = "center head-color"><strong>TECHNITES - Smart Displays</strong></h1><br><br><br><br><br>
+	<h1 class = "center head-color"><strong>TECHNITES - SMART DISPLAYS</strong></h1><br><br>
 	<form action = "message" class="center" method="GET">
 		<p>Message being Dispalyed : @</p>
-        <p>Type the message to be displayed and press send</p>
+        <p><strong>Type the message to be displayed and press send</strong></p>
         <input type="text" name="msg"/>
+				<br>
+				<p><strong>Select the animation</strong></p>
+				<br>
+				<input type = "radio" name = "slice" value = "1">Slice
+				<input type = "radio" name = "slice" value = "0">Scroll
+				<br>
+				<p><strong>Select the font</strong></p>
+				<input type = "radio" name = "font" value = "0">8x8 Font
+				<input type = "radio" name = "font" value = "1">7x5 Font
+				<br><br>
         <input type="submit" value="send"/>
 </body>
 </html>
